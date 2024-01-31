@@ -1,0 +1,133 @@
+package jdbc_connectivity;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Scanner scanner = new Scanner(System.in);
+
+            System.out.println("Connecting to database...");
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3307/varun", "root", "root");
+            System.out.println("Connected to database");
+
+            boolean exit = false;
+
+            while (!exit) {
+                System.out.println("\nChoose operation:");
+                System.out.println("1. Insert data");
+                System.out.println("2. Read data");
+                System.out.println("3. Update data");
+                System.out.println("4. Delete data");
+                System.out.println("5. Exit");
+
+                int choice = scanner.nextInt();
+
+                switch (choice) {
+                    case 1:
+                        insertData(cn, scanner);
+                        break;
+                    case 2:
+                        readData(cn);
+                        break;
+                    case 3:
+                        updateData(cn, scanner);
+                        break;
+                    case 4:
+                        deleteData(cn, scanner);
+                        break;
+                    case 5:
+                        exit = true;
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            }
+
+            cn.close();
+            System.out.println("Connection closed.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void insertData(Connection cn, Scanner scanner) throws SQLException {
+        System.out.println("Enter Name:");
+        String name = scanner.next();
+        System.out.println("Enter Phone Number:");
+        long phoneNumber = scanner.nextLong();
+
+        String query = "INSERT INTO login2 (Name, Phone_Number) VALUES (?, ?)";
+        try (PreparedStatement pst = cn.prepareStatement(query)) {
+            pst.setString(1, name);
+            pst.setLong(2, phoneNumber);
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Data inserted successfully.");
+            } else {
+                System.out.println("Failed to insert data.");
+            }
+        }
+    }
+
+    private static void readData(Connection cn) throws SQLException {
+        String query = "SELECT * FROM login2";
+        try (Statement st = cn.createStatement();
+             ResultSet rs = st.executeQuery(query)) {
+
+            System.out.println("ID\tName\tPhone Number");
+            while (rs.next()) {
+                int id = rs.getInt("ID");
+                String name = rs.getString("Name");
+                long phoneNumber = rs.getLong("Phone_Number");
+                System.out.println(id + "\t" + name + "\t" + phoneNumber);
+            }
+        }
+    }
+
+    private static void updateData(Connection cn, Scanner scanner) throws SQLException {
+        System.out.println("Enter ID of the record to update:");
+        int id = scanner.nextInt();
+        System.out.println("Enter new Name:");
+        String newName = scanner.next();
+        System.out.println("Enter new Phone Number:");
+        long newPhoneNumber = scanner.nextLong();
+
+        String query = "UPDATE login2 SET Name=?, Phone_Number=? WHERE ID=?";
+        try (PreparedStatement pst = cn.prepareStatement(query)) {
+            pst.setString(1, newName);
+            pst.setLong(2, newPhoneNumber);
+            pst.setInt(3, id);
+
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Data updated successfully.");
+            } else {
+                System.out.println("Failed to update data. Check if the ID exists.");
+            }
+        }
+    }
+
+    private static void deleteData(Connection cn, Scanner scanner) throws SQLException {
+        System.out.println("Enter ID of the record to delete:");
+        int id = scanner.nextInt();
+
+        String query = "DELETE FROM login2 WHERE ID=?";
+        try (PreparedStatement pst = cn.prepareStatement(query)) {
+            pst.setInt(1, id);
+            int rowsAffected = pst.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Data deleted successfully.");
+            } else {
+                System.out.println("Failed to delete data. Check if the ID exists.");
+            }
+        }
+    }
+}

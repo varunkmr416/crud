@@ -1,0 +1,29 @@
+package jdbc_connectivity;
+
+//import java.beans.Statement;
+import java.sql.Statement ;
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            System.out.println("uihijhi");
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection cn=DriverManager.getConnection("jdbc:mysql://localhost:3307/varun","root",
+                    "root");
+            Statement st=  cn.createStatement();
+            st.executeUpdate("INSERT INTO login (Name, Phone_Number) VALUES ('Ankur', 9934234535)");
+            st.executeUpdate("INSERT INTO login (Name, Phone_Number) VALUES ('Varun', 9934234535)");
+            cn.close();
+            System.out.println("data save");
+
+        } catch (Exception e) {
+            System.out.println(e);
+            // TODO: handle exception
+        }
+
+    }
+
+}
